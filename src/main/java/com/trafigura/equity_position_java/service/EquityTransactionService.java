@@ -35,16 +35,12 @@ public class EquityTransactionService {
     }
 
 	public List<EquityTransaction> getEquityPositions() {
-     List<EquityTransaction> allEquities = equityRepo.findAll();
-    	
-     Map<String, EquityTransaction> highestQuantityEquty = allEquities.stream()
-             .collect(Collectors.toMap(
-            		 EquityTransaction::getSecurityCode,
-                     equity -> equity,
-                     (existingEquity, newEquity) -> newEquity.getQuantity() > existingEquity.getQuantity() ? newEquity : existingEquity
-             ));
-     List<EquityTransaction> valuesList = highestQuantityEquty.values().stream()
-             .collect(Collectors.toList());
-     return valuesList;
+     List<EquityTransaction> allEquities = equityRepo.calcEquityPositions();
+     allEquities.stream().forEach(e -> {
+         if(e.getCrudeType().equals("CANCEL")) {
+        	 e.setQuantity(0L);
+         }
+     });
+     return allEquities;
 	}
 }
